@@ -1,19 +1,23 @@
-app = "hakimi-bot-sunset-01"   # tout en minuscules, chiffres, tirets
-primary_region = "cdg"
+# fly.toml app configuration file generated for hakimi-bot-oa2khg on 2025-09-13T12:44:49Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-[env]
-  PYTHONUNBUFFERED = "1"
+app = 'hakimi-bot-oa2khg'
+primary_region = 'cdg'
 
-auto_stop_machines = false
-auto_start_machines = true
-kill_signal = "SIGINT"
-kill_timeout = "5s"
+[build]
 
-[processes]
-  app = "python main.py"
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
-[vm]
-  cpu_kind = "shared"
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
   cpus = 1
-  memory = "256mb"
-
+  memory_mb = 256
