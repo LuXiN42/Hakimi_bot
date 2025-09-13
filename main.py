@@ -173,6 +173,44 @@ async def canard(update, context):
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
 
 
+async def meow(update, context):
+    # Liste des fichiers vocaux dans le dossier media/vocaux
+    vocaux_path = "media/vocaux/meow"
+    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
+    
+    if vocaux:
+        # Choisir un fichier aléatoire
+        vocal_choisi = random.choice(vocaux)
+        vocal_path = os.path.join(vocaux_path, vocal_choisi)
+        
+        # Envoyer le fichier vocal choisi
+        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        
+
+async def cacahuetes(update, context):
+    video_path = "media/cacahuètes.mp4"  
+    if os.path.exists(video_path):
+        await update.message.reply_video(video=open(video_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+        
+
+async def snuss(update, context):
+    # Liste des phrases à envoyer de façon aléatoire
+    phrases = [
+        "J'ai du HARDCORE",
+        "C'est du 12 mg de nicotine",
+        "La dernière fois que j'en ai pris j'étais en bad trip"
+    ]
+    
+    # Choisir une phrase aléatoire
+    phrase_choisie = random.choice(phrases)
+    
+    # Envoyer la phrase choisie
+    await update.message.reply_text(phrase_choisie)
+
 
 if __name__ == '__main__':
     app = Application.builder().token(token).build()
@@ -187,6 +225,13 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('prochainpres', nextPres))
     app.add_handler(CommandHandler('capartencouilles', nimp))
     app.add_handler(CommandHandler('canard', canard))
+    app.add_handler(CommandHandler('meow', meow))
+    app.add_handler(CommandHandler('snuss', snuss))
+    app.add_handler(CommandHandler('cacahuetes', cacahuetes))
+    
+    
+    
+    
     
     
     app.run_polling(poll_interval=5)

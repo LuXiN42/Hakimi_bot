@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /media/data/Documents/BDE/comm/Hakimi_bot/.venv
+set -gx VIRTUAL_ENV /home/loic/Documents/BDE/Hakimi_bot/.venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

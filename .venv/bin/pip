@@ -1,4 +1,4 @@
-#!/media/data/Documents/BDE/comm/Hakimi_bot/.venv/bin/python
+#!/home/loic/Documents/BDE/Hakimi_bot/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
