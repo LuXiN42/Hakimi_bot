@@ -1,20 +1,14 @@
-# fly.toml
-app = "Hakimi_bot"           # <-- choisis un nom unique global
-primary_region = "cdg"       # Paris
-
-[build]
-  dockerfile = "Dockerfile"
+app = "hakimi-bot-sunset-01"   # tout en minuscules, chiffres, tirets
+primary_region = "cdg"
 
 [env]
   PYTHONUNBUFFERED = "1"
 
-# Machines: ne pas s’arrêter automatiquement (sinon ton bot s’éteint)
 auto_stop_machines = false
 auto_start_machines = true
 kill_signal = "SIGINT"
 kill_timeout = "5s"
 
-# Pas de service HTTP: on déclare juste le process à lancer
 [processes]
   app = "python main.py"
 

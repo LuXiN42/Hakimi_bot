@@ -1,0 +1,39 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches: [ "main" ]   # change si ta branche de prod est différente
+  workflow_dispatch:        # permet de lancer manuellement
+
+env:
+  FLY_APP_NAME: hakimi-bot-sunset-01   # <= mets EXACTEMENT le même nom que dans fly.toml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+        with:
+          version: latest
+
+      # on pousse le secret TELEGRAM_TOKEN vers l'app Fly
+      - name: Set secrets on Fly
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: |
+          flyctl secrets set TELEGRAM_TOKEN="$TELEGRAM_TOKEN" --app "$FLY_APP_NAME" --stage
+
+      - name: Deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --app "$FLY_APP_NAME" --remote-only
+
