@@ -2,11 +2,11 @@ name: Deploy to Fly.io
 
 on:
   push:
-    branches: [ "main" ]   # change si ta branche de prod est différente
-  workflow_dispatch:        # permet de lancer manuellement
+    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
-  FLY_APP_NAME: hakimi-bot-sunset-01   # <= mets EXACTEMENT le même nom que dans fly.toml
+  FLY_APP_NAME: hakimi-bot-sunset-01
 
 jobs:
   deploy:
@@ -23,17 +23,40 @@ jobs:
         with:
           version: latest
 
-      # on pousse le secret TELEGRAM_TOKEN vers l'app Fly
-      - name: Set secrets on Fly
+      # Vérif rapide des secrets côté GitHub (échoue si vides)
+      - name: Validate GitHub secrets
+        run: |
+          test -n "${{ secrets.FLY_API_TOKEN }}" || (echo "Missing FLY_API_TOKEN" && exit 1)
+          test -n "${{ secrets.TELEGRAM_TOKEN }}" || (echo "Missing TELEGRAM_TOKEN" && exit 1)
+
+      # Pousse le secret sur Fly (actif immédiatement)
+      - name: Set TELEGRAM_TOKEN on Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
-          flyctl secrets set TELEGRAM_TOKEN="$TELEGRAM_TOKEN" --app "$FLY_APP_NAME" --stage
+          flyctl secrets set TELEGRAM_TOKEN="$TELEGRAM_TOKEN" --app "$FLY_APP_NAME"
 
+      # (Optionnel) Assure une seule instance (évite double-polling)
+      - name: Ensure single machine
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl scale count 1 --app "$FLY_APP_NAME"
+
+      # Déploiement (utilise ton Dockerfile + fly.toml)
       - name: Deploy
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          flyctl deploy --app "$FLY_APP_NAME" --remote-only
+          flyctl deploy --app "$FLY_APP_NAME" --verbose
+
+      # En cas d'échec, sortir quelques infos utiles
+      - name: Show status and recent logs on failure
+        if: failure()
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl status --app "$FLY_APP_NAME" || true
+          flyctl logs --app "$FLY_APP_NAME" --since 15m || true
 

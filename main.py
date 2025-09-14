@@ -1,249 +1,205 @@
 import os
 import random
-import asyncio
+from pathlib import Path
 from dotenv import load_dotenv
-from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
+# Charger .env en local (sans effet sur Fly si tu utilises fly secrets)
 load_dotenv()
-0
-token = "7114835642:AAF9XV6TRRW6Os465vxLPSo_wCF9rAIy-PU"
 
-async def start(update, context):
-    await update.message.reply_text("""Bienvenue sur le bot des Sunset.
-Je suis Hakimi le bot préféré de ton bot préféré.
-Tu peux faire : 
-    - /dj
-    - /rire
-    - /liens
-    - /chant
-    - /fb
-    - /president
-    - /prochainpres
-    - /capartencouilles
-    - /canard
-    - /meow
-    - /snuss
-    - /cachuetes
-    - /dance
-                                    """)
+# Récupérer le token depuis l'environnement
+TOKEN = os.environ.get("TELEGRAM_TOKEN")
+if not TOKEN:
+    raise RuntimeError("TELEGRAM_TOKEN manquant. Définis-le via fly secrets set TELEGRAM_TOKEN=...")
 
+# Racine des médias (assure-toi que ces chemins existent dans l'image Docker)
+MEDIA_DIR = Path("media")
 
-async def liens(update, context):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Bienvenue sur le bot des Sunset.\n"
+        "Je suis Hakimi le bot préféré de ton bot préféré.\n"
+        "Tu peux faire : \n"
+        "    - /dj\n"
+        "    - /rire\n"
+        "    - /liens\n"
+        "    - /chant\n"
+        "    - /fb\n"
+        "    - /president\n"
+        "    - /prochainpres\n"
+        "    - /capartencouilles\n"
+        "    - /canard\n"
+        "    - /meow\n"
+        "    - /snuss\n"
+        "    - /cacahuetes\n"
+        "    - /sagmmescouilles\n"
+        "    - /dance\n"
+    )
+
+async def liens(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton('Instagram', 'https://www.instagram.com/bde.sunset/')],
-        [InlineKeyboardButton('Site', 'https://liste-sunset.fr/')],
-        [InlineKeyboardButton('Youtube', 'https://youtube.com/@liste-sunset?si=FvB00brajx9j47bR')],
-        [InlineKeyboardButton('TikTok', 'https://www.tiktok.com/@liste_sunset')],
-        [InlineKeyboardButton('Canal', 'https://t.me/+uItkhH-TFwpmMGE0')]
-        ]
+        [InlineKeyboardButton('Instagram', url='https://www.instagram.com/bde.sunset/')],
+        [InlineKeyboardButton('Site', url='https://liste-sunset.fr/')],
+        [InlineKeyboardButton('Youtube', url='https://youtube.com/@liste-sunset?si=FvB00brajx9j47bR')],
+        [InlineKeyboardButton('TikTok', url='https://www.tiktok.com/@liste_sunset')],
+        [InlineKeyboardButton('Canal', url='https://t.me/+uItkhH-TFwpmMGE0')],
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await update.message.reply_text("Voici nos différents réseaux sociaux :",
-                                    reply_markup = reply_markup)
-    
+    await update.message.reply_text("Voici nos différents réseaux sociaux :", reply_markup=reply_markup)
+
+# --------------------------------- VIDEOS ---------------------------------
 
 
-######################################################################################################################
-###################################################   VIDEO   ########################################################
-######################################################################################################################
-
-
-async def cacahuetes(update, context):
-    video_path = "media/cacahuètes.mp4"  
-    if os.path.exists(video_path):
-        await update.message.reply_video(video=open(video_path, 'rb'))
+async def send_video_path(update: Update, path: Path):
+    if path.exists():
+        with path.open("rb") as f:
+            await update.message.reply_video(video=f)
     else:
         await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+
+
+async def cacahuetes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "cacahuètes.mp4")
+
+
+async def dj(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "dj.MOV")
+
+
+async def sagmmescouilles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "sagmmescouilles.MP4")
 
 
 async def dance(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Dossier contenant les vidéos
-    video_dir = "media/dance"
-    videos = [f for f in os.listdir(video_dir) if f.endswith(".mp4")]
-    
-    if videos:
-        # Choisir une vidéo aléatoirement
-        video_choisi = random.choice(videos)
-        video_path = os.path.join(video_dir, video_choisi)
-        
-        # Envoyer la vidéo
-        await update.message.reply_video(video=open(video_path, "rb"))
-    else:
+    video_dir = MEDIA_DIR / "dance"
+    if not video_dir.is_dir():
+        await update.message.reply_text("Désolé, le dossier des vidéos n'existe pas.")
+        return
+    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".mp4"]
+    if not videos:
         await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
+        return
+    await send_video_path(update, random.choice(videos))
 
 
-async def dj(update, context):
-    video_path = "media/dj.MOV"  
-    if os.path.exists(video_path):
-        await update.message.reply_video(video=open(video_path, 'rb'))
+# --------------------------------- VOIX ---------------------------------
+
+
+async def send_voice_path(update: Update, path: Path):
+    if path.exists():
+        with path.open("rb") as f:
+            await update.message.reply_voice(voice=f)
     else:
-        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
-        
-
-async def sagmmescouilles(update, context):
-    video_path = "media/sagmmescouilles.MP4"  
-    if os.path.exists(video_path):
-        await update.message.reply_video(video=open(video_path, 'rb'))
-    else:
-        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+        await update.message.reply_text("Désolé, le fichier vocal est introuvable.")
 
 
-######################################################################################################################
-#################################################   VOCAUX   #########################################################
-######################################################################################################################
-
-
-async def canard(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
-        
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
+async def canard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    vocaux_path = MEDIA_DIR / "vocaux"
+    if not vocaux_path.is_dir():
+        await update.message.reply_text("Désolé, aucun dossier de vocaux.")
+        return
+    vocaux = [p for p in vocaux_path.iterdir() if p.suffix.lower() in (".m4a", ".ogg")]
+    if not vocaux:
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        return
+    await send_voice_path(update, random.choice(vocaux))
 
 
-async def chant(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/chants"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.ogg', '.mp3'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
-        
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
+async def chant(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    vocaux_path = MEDIA_DIR / "vocaux" / "chants"
+    if not vocaux_path.is_dir():
+        await update.message.reply_text("Désolé, aucun dossier de chants.")
+        return
+    vocaux = [p for p in vocaux_path.iterdir() if p.suffix.lower() in (".ogg", ".mp3")]
+    if not vocaux:
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        return
+    await send_voice_path(update, random.choice(vocaux))
 
 
-async def meow(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/meow"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
-        
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
+async def meow(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    vocaux_path = MEDIA_DIR / "vocaux" / "meow"
+    if not vocaux_path.is_dir():
+        await update.message.reply_text("Désolé, aucun dossier 'meow'.")
+        return
+    vocaux = [p for p in vocaux_path.iterdir() if p.suffix.lower() in (".m4a", ".ogg")]
+    if not vocaux:
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        return
+    await send_voice_path(update, random.choice(vocaux))
 
 
-async def rire(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/rires"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.ogg', '.mp3'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
-        
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
+async def rire(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    vocaux_path = MEDIA_DIR / "vocaux" / "rires"
+    if not vocaux_path.is_dir():
+        await update.message.reply_text("Désolé, aucun dossier 'rires'.")
+        return
+    vocaux = [p for p in vocaux_path.iterdir() if p.suffix.lower() in (".ogg", ".mp3")]
+    if not vocaux:
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        return
+    await send_voice_path(update, random.choice(vocaux))
 
 
-######################################################################################################################
-###############################################   MESSAGES   #########################################################
-######################################################################################################################
+# ------------------------------- TEXTES ---------------------------------
 
 
-async def fb(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
+async def fb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phrases = [
         "Ici breakfun, merci pour les cautions, on s'est régalé",
         "Il est 21h passé tout le monde se tait",
         "Fuckbreak",
         "Alors elles sont passés où les bannières ?",
-        "Au revoir baptiste"
+        "Au revoir baptiste",
     ]
-    
-    # Choisir une phrase aléatoire
-    phrase_choisie = random.choice(phrases)
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase_choisie)
+    await update.message.reply_text(random.choice(phrases))
 
 
-async def president(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
+async def president(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phrases = [
         "On en est au combien déjà ?",
         "Qui veut devenir président ?",
-        "Ca fait long Antonin tu veux pas on change ?"
+        "Ca fait long Antonin tu veux pas on change ?",
     ]
-    
-    # Choisir une phrase aléatoire
-    phrase_choisie = random.choice(phrases)
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase_choisie)
+    await update.message.reply_text(random.choice(phrases))
 
 
-async def nextPres(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
-    phrase = "Le prochain président est"
-    
-    # Liste des noms des 28 personnes
+async def nextPres(update: Update, context: ContextTypes.DEFAULT_TYPE):
     personnes = [
-        "Andréa", "Lucas", "Kevin", "Clémence", "Eloise", "Jonathan", "Sofiane", 
-        "Antonin", "Romain", "Lou", "Lilou", "Wail", "Enora", "Killian", "Loïc", 
-        "Matthias", "Sophie", "Anfel", "Clément", "Tom", "Jonastan", "Daphné", 
-        "Maël", "Charly", "Circé", "Sirine", "Vincent", "Emilline"
+        "Andréa","Lucas","Kevin","Clémence","Eloise","Jonathan","Sofiane",
+        "Antonin","Romain","Lou","Lilou","Wail","Enora","Killian","Loïc",
+        "Matthias","Sophie","Anfel","Clément","Tom","Jonastan","Daphné",
+        "Maël","Charly","Circé","Sirine","Vincent","Emilline",
     ]
+    await update.message.reply_text(f"Le prochain président est {random.choice(personnes)} SET")
 
-    random_person = random.choice(personnes)
-    phrase += f" {random_person} SET"
-    
-    # Envoyer la phrase choisie
+
+async def nimp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    phrase = ("c’est des poulets mafieux au cinéma après avoir durement travaillé au téléphone rose "
+              "et vendu des 10 balles pour repayer le téléphone de sofiane, il y a une bagarre au sunset à cergy "
+              "pref entre des moutons pré aid et des poules pré chicken street qui se battent le rainté en match à "
+              "mort par équipe, y’a aussi un lion sous dégradé à blanc qui s’est battu après les poules vont en soirée "
+              "et elles twerkent ou dansent sur de la tectonic et y a le loup qui les surveillent et si elles dansent pas "
+              "il les mange avec de la sauce salsa qui pique vraiment vraiment beaucoup parce que c'est de la sauce mexicaine "
+              "qui vient de Pablo Escobar")
     await update.message.reply_text(phrase)
 
 
-async def nimp(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
-    phrase = "c’est des poulets mafieux au cinéma après avoir durement travaillé au téléphone rose et vendu des 10 balles pour repayer le téléphone de sofiane, il y a une bagarre au sunset à cergy pref entre des moutons pré aid et des poules pré chicken street qui se battent le rainté en match à mort par équipe, y’a aussi un lion sous dégradé à blanc qui s’est battu après les poules vont en soirée et elles twerkent ou dansent sur de la tectonic et y a le loup qui les surveillent et si elles dansent pas il les mange avec de la sauce salsa qui pique vraiment vraiment beaucoup parce que c'est de la sauce mexicaine qui vient de Pablo Escobar"
-
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase)
-
-        
-async def snuss(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
+async def snuss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phrases = [
         "J'ai du HARDCORE",
         "C'est du 12 mg de nicotine",
-        "La dernière fois que j'en ai pris j'étais en bad trip"
+        "La dernière fois que j'en ai pris j'étais en bad trip",
     ]
-    
-    # Choisir une phrase aléatoire
-    phrase_choisie = random.choice(phrases)
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase_choisie)
-    
-    
+    await update.message.reply_text(random.choice(phrases))
 
 
 
-if __name__ == '__main__':
-    app = Application.builder().token(token).build()
-    
+
+def build_app() -> Application:
+    app = Application.builder().token(TOKEN).build()
+
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('liens', liens))
     app.add_handler(CommandHandler('dj', dj))
@@ -259,10 +215,8 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('cacahuetes', cacahuetes))
     app.add_handler(CommandHandler('sagmmescouilles', sagmmescouilles))
     app.add_handler(CommandHandler('dance', dance))
-    
-    
-    
-    
-    
-    
-    app.run_polling(poll_interval=5)
+    return app
+
+if __name__ == '__main__':
+    application = build_app()
+    application.run_polling(poll_interval=5)
