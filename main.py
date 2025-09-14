@@ -21,6 +21,11 @@ Tu peux faire :
     - /president
     - /prochainpres
     - /capartencouilles
+    - /canard
+    - /meow
+    - /snuss
+    - /cachuetes
+    - /dance
                                     """)
 
 
@@ -38,18 +43,61 @@ async def liens(update, context):
                                     reply_markup = reply_markup)
     
 
-async def dj(update, context):
-    video_path = "media/dj.MOV"  
+
+######################################################################################################################
+###################################################   VIDEO   ########################################################
+######################################################################################################################
+
+
+async def cacahuetes(update, context):
+    video_path = "media/cacahuètes.mp4"  
     if os.path.exists(video_path):
         await update.message.reply_video(video=open(video_path, 'rb'))
     else:
         await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
 
 
-async def rire(update, context):
+async def dance(update, context):
+    # Liste des fichiers video dans le dossier media/dance
+    video_path = "media/dance"
+    video = [f for f in os.listdir(video_path) if f.endswith(('.mp4'))]
+    
+    if video:
+        # Choisir un fichier aléatoire
+        video_choisi = random.choice(video)
+        video_path = os.path.join(video_path, video_choisi)
+        
+        # Envoyer le fichier vocal choisi
+        await update.message.reply_voice(video=open(video_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+
+
+async def dj(update, context):
+    video_path = "media/dj.MOV"  
+    if os.path.exists(video_path):
+        await update.message.reply_video(video=open(video_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+        
+
+async def sagmmescouilles(update, context):
+    video_path = "media/sagmmescouilles.mp4"  
+    if os.path.exists(video_path):
+        await update.message.reply_video(video=open(video_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+
+
+######################################################################################################################
+#################################################   VOCAUX   #########################################################
+######################################################################################################################
+
+
+async def canard(update, context):
     # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/rires"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.ogg', '.mp3'))]
+    vocaux_path = "media/vocaux/"
+    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
     
     if vocaux:
         # Choisir un fichier aléatoire
@@ -76,6 +124,60 @@ async def chant(update, context):
         await update.message.reply_voice(voice=open(vocal_path, 'rb'))
     else:
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+
+
+async def meow(update, context):
+    # Liste des fichiers vocaux dans le dossier media/vocaux
+    vocaux_path = "media/vocaux/meow"
+    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
+    
+    if vocaux:
+        # Choisir un fichier aléatoire
+        vocal_choisi = random.choice(vocaux)
+        vocal_path = os.path.join(vocaux_path, vocal_choisi)
+        
+        # Envoyer le fichier vocal choisi
+        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+
+
+async def rire(update, context):
+    # Liste des fichiers vocaux dans le dossier media/vocaux
+    vocaux_path = "media/vocaux/rires"
+    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.ogg', '.mp3'))]
+    
+    if vocaux:
+        # Choisir un fichier aléatoire
+        vocal_choisi = random.choice(vocaux)
+        vocal_path = os.path.join(vocaux_path, vocal_choisi)
+        
+        # Envoyer le fichier vocal choisi
+        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
+    else:
+        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+
+
+######################################################################################################################
+###############################################   MESSAGES   #########################################################
+######################################################################################################################
+
+
+async def fb(update, context):
+    # Liste des phrases à envoyer de façon aléatoire
+    phrases = [
+        "Ici breakfun, merci pour les cautions, on s'est régalé",
+        "Il est 21h passé tout le monde se tait",
+        "Fuckbreak",
+        "Alors elles sont passés où les bannières ?",
+        "Au revoir baptiste"
+    ]
+    
+    # Choisir une phrase aléatoire
+    phrase_choisie = random.choice(phrases)
+    
+    # Envoyer la phrase choisie
+    await update.message.reply_text(phrase_choisie)
 
 
 async def president(update, context):
@@ -112,91 +214,15 @@ async def nextPres(update, context):
     await update.message.reply_text(phrase)
 
 
-async def reu(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
-    phrases = [
-        "Reu demain 18h les SS",
-        "",
-        "Fuckbreak",
-        "Alors elles sont passés où les bannières ?",
-        "Au revoir baptiste"
-    ]
-    
-    # Choisir une phrase aléatoire
-    phrase_choisie = random.choice(phrases)
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase_choisie)
-
-
-async def fb(update, context):
-    # Liste des phrases à envoyer de façon aléatoire
-    phrases = [
-        "Ici breakfun, merci pour les cautions, on s'est régalé",
-        "Il est 21h passé tout le monde se tait",
-        "Fuckbreak",
-        "Alors elles sont passés où les bannières ?",
-        "Au revoir baptiste"
-    ]
-    
-    # Choisir une phrase aléatoire
-    phrase_choisie = random.choice(phrases)
-    
-    # Envoyer la phrase choisie
-    await update.message.reply_text(phrase_choisie)
-    
-
 async def nimp(update, context):
     # Liste des phrases à envoyer de façon aléatoire
     phrase = "c’est des poulets mafieux au cinéma après avoir durement travaillé au téléphone rose et vendu des 10 balles pour repayer le téléphone de sofiane, il y a une bagarre au sunset à cergy pref entre des moutons pré aid et des poules pré chicken street qui se battent le rainté en match à mort par équipe, y’a aussi un lion sous dégradé à blanc qui s’est battu après les poules vont en soirée et elles twerkent ou dansent sur de la tectonic et y a le loup qui les surveillent et si elles dansent pas il les mange avec de la sauce salsa qui pique vraiment vraiment beaucoup parce que c'est de la sauce mexicaine qui vient de Pablo Escobar"
 
     
-
-    
     # Envoyer la phrase choisie
     await update.message.reply_text(phrase)
 
-
-async def canard(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
         
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
-        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
-
-
-async def meow(update, context):
-    # Liste des fichiers vocaux dans le dossier media/vocaux
-    vocaux_path = "media/vocaux/meow"
-    vocaux = [f for f in os.listdir(vocaux_path) if f.endswith(('.m4a', '.ogg'))]
-    
-    if vocaux:
-        # Choisir un fichier aléatoire
-        vocal_choisi = random.choice(vocaux)
-        vocal_path = os.path.join(vocaux_path, vocal_choisi)
-        
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(voice=open(vocal_path, 'rb'))
-    else:
-        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
-        
-
-async def cacahuetes(update, context):
-    video_path = "media/cacahuètes.mp4"  
-    if os.path.exists(video_path):
-        await update.message.reply_video(video=open(video_path, 'rb'))
-    else:
-        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
-        
-
 async def snuss(update, context):
     # Liste des phrases à envoyer de façon aléatoire
     phrases = [
@@ -210,6 +236,9 @@ async def snuss(update, context):
     
     # Envoyer la phrase choisie
     await update.message.reply_text(phrase_choisie)
+    
+    
+
 
 
 if __name__ == '__main__':
@@ -228,6 +257,8 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('meow', meow))
     app.add_handler(CommandHandler('snuss', snuss))
     app.add_handler(CommandHandler('cacahuetes', cacahuetes))
+    app.add_handler(CommandHandler('sagmmescouilles', sagmmescouilles))
+    app.add_handler(CommandHandler('dance', dance))
     
     
     
