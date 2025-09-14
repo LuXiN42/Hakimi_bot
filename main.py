@@ -57,20 +57,20 @@ async def cacahuetes(update, context):
         await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
 
 
-async def dance(update, context):
-    # Liste des fichiers video dans le dossier media/dance
-    video_path = "media/dance"
-    video = [f for f in os.listdir(video_path) if f.endswith(('.mp4'))]
+async def dance(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Dossier contenant les vidéos
+    video_dir = "media/dance"
+    videos = [f for f in os.listdir(video_dir) if f.endswith(".mp4")]
     
-    if video:
-        # Choisir un fichier aléatoire
-        video_choisi = random.choice(video)
-        video_path = os.path.join(video_path, video_choisi)
+    if videos:
+        # Choisir une vidéo aléatoirement
+        video_choisi = random.choice(videos)
+        video_path = os.path.join(video_dir, video_choisi)
         
-        # Envoyer le fichier vocal choisi
-        await update.message.reply_voice(video=open(video_path, 'rb'))
+        # Envoyer la vidéo
+        await update.message.reply_video(video=open(video_path, "rb"))
     else:
-        await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
+        await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
 
 
 async def dj(update, context):
@@ -82,7 +82,7 @@ async def dj(update, context):
         
 
 async def sagmmescouilles(update, context):
-    video_path = "media/sagmmescouilles.mp4"  
+    video_path = "media/sagmmescouilles.MP4"  
     if os.path.exists(video_path):
         await update.message.reply_video(video=open(video_path, 'rb'))
     else:
