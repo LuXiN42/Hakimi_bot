@@ -4,6 +4,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+from telegram import Update
+from telegram.ext import ContextTypes
 
 # Charger .env en local (sans effet sur Fly si tu utilises fly secrets)
 load_dotenv()
@@ -195,6 +199,47 @@ async def snuss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(random.choice(phrases))
 
 
+# ------------------------------- PEARL ---------------------------------
+
+def _format_countdown(delta: timedelta) -> str:
+    if delta.total_seconds() <= 0:
+        return "C'est maintenant !"
+    days = delta.days
+    seconds = delta.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+    parts = []
+    if days:   parts.append(f"{days} jour{'s' if days>1 else ''}")
+    if hours:  parts.append(f"{hours} h")
+    if minutes:parts.append(f"{minutes} min")
+    if secs or not parts: parts.append(f"{secs} s")
+    return "Dans " + " ".join(parts)
+
+async def pearl(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    tz = ZoneInfo("Europe/Paris")
+    now = datetime.now(tz)
+
+    # Prochaine occurrence du 18 septembre à 18:00 (année courante ou suivante si déjà passé)
+    target = datetime(year=now.year, month=9, day=18, hour=18, minute=0, second=0, tzinfo=tz)
+    if target <= now:
+        target = target.replace(year=now.year + 1)
+
+    countdown = _format_countdown(target - now)
+
+    # Image à envoyer (mets ton fichier ici : media/pearl.jpg)
+    photo_path = MEDIA_DIR / "pearl" / "pearl1.png"
+    if photo_path.exists():
+        with photo_path.open("rb") as f:
+            await update.message.reply_photo(
+                photo=f,
+                caption=f"✨ Pearl ✨\n{countdown}\n(échéance : {target.strftime('%A %d %B %Y à %Hh').capitalize()})"
+            )
+    else:
+        await update.message.reply_text(
+            f"{countdown}\n(échéance : {target.strftime('%A %d %B %Y à %Hh').capitalize()})\n"
+            "⚠️ Image introuvable : place un fichier à `media/pearl/pearl.png`."
+        )
 
 
 def build_app() -> Application:
@@ -215,6 +260,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('cacahuetes', cacahuetes))
     app.add_handler(CommandHandler('sagmmescouilles', sagmmescouilles))
     app.add_handler(CommandHandler('dance', dance))
+    app.add_handler(CommandHandler('pearl', pearl))
     return app
 
 if __name__ == '__main__':
