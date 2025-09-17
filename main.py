@@ -6,8 +6,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from telegram import Update
-from telegram.ext import ContextTypes
+from functools import wraps
 
 # Charger .env en local (sans effet sur Fly si tu utilises fly secrets)
 load_dotenv()
@@ -20,6 +19,27 @@ if not TOKEN:
 # Racine des médias (assure-toi que ces chemins existent dans l'image Docker)
 MEDIA_DIR = Path("media")
 
+
+# -------------------------- ANTI-DOUBLON --------------------------
+def once_per_message(func):
+    """
+    Empêche de répondre plusieurs fois au même message (par ce process).
+    Clé = (chat_id, message_id) stockée dans application.bot_data.
+    """
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        msg = update.effective_message
+        if not msg:
+            return
+        key = f"handled:{msg.chat_id}:{msg.message_id}"
+        if context.application.bot_data.get(key):
+            return  # déjà traité
+        context.application.bot_data[key] = True
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
+
+# -------------------------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Bienvenue sur le bot des Sunset.\n"
@@ -39,6 +59,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "    - /cacahuetes\n"
         "    - /sagmmescouilles\n"
         "    - /dance\n"
+        "    - /pearl\n"
+        "    - /otiste\n"
     )
 
 async def liens(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -144,6 +166,23 @@ async def rire(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
         return
     await send_voice_path(update, random.choice(vocaux))
+    
+
+# ------------------------------- IMAGES ---------------------------------
+async def otiste(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Envoie une photo aléatoire depuis media/otiste/"""
+    img_dir = MEDIA_DIR / "otiste"
+    if not img_dir.is_dir():
+        await update.message.reply_text("Désolé, le dossier 'otiste' n'existe pas.")
+        return
+    images = [p for p in img_dir.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")]
+    if not images:
+        await update.message.reply_text("Désolé, aucune image disponible dans 'otiste'.")
+        return
+    path = random.choice(images)
+    with path.open("rb") as f:
+        await update.message.reply_photo(photo=f)
+
 
 
 # ------------------------------- TEXTES ---------------------------------
@@ -261,8 +300,9 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('sagmmescouilles', sagmmescouilles))
     app.add_handler(CommandHandler('dance', dance))
     app.add_handler(CommandHandler('pearl', pearl))
+    app.add_handler(CommandHandler('otiste', once_per_message(otiste)))
     return app
 
 if __name__ == '__main__':
     application = build_app()
-    application.run_polling(poll_interval=5)
+    application.run_polling(poll_interval=5, drop_pending_updates=True)
