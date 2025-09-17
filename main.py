@@ -87,6 +87,10 @@ async def send_video_path(update: Update, path: Path):
 
 async def cacahuetes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_video_path(update, MEDIA_DIR / "cacahuètes.mp4")
+    
+
+async def bdestaffbde(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "bdestaffbde.mp4")
 
 
 async def dj(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -341,6 +345,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('pearl', once_per_message(pearl)))
     app.add_handler(CommandHandler('otiste', once_per_message(otiste)))
     app.add_handler(CommandHandler('pacif', once_per_message(pacif)))
+    app.add_handler(CommandHandler('bdestaffbde', once_per_message(bdestaffbde)))
 
     return app
 
