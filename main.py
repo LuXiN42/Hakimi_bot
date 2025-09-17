@@ -272,7 +272,7 @@ async def pearl(update: Update, context: ContextTypes.DEFAULT_TYPE):
         with photo_path.open("rb") as f:
             await update.message.reply_photo(
                 photo=f,
-                caption=f"✨ Pearl ✨\n{countdown}\n(échéance : {target.strftime('%A %d %B %Y à %Hh').capitalize()})"
+                caption=f"✨ Pearl ✨\n{countdown}\n"
             )
     else:
         await update.message.reply_text(
@@ -299,7 +299,6 @@ async def pacif(update: Update, context: ContextTypes.DEFAULT_TYPE):
     caption = (
         f"🎉 Soirée PACIF 🎉\n"
         f"{countdown}\n"
-        f"(échéance : {target.strftime('%A %d %B %Y à %Hh').capitalize()})"
     )
 
     # Envoi d'une image aléatoire du dossier media/pacif en légende
