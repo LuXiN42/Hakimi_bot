@@ -281,26 +281,67 @@ async def pearl(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+# ------------------------------- PACIF ---------------------------------
+async def pacif(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Annonce la soirée PACIF avec un compte à rebours jusqu'au 23 septembre à 22h
+    et envoie une image depuis media/pacif en légende.
+    """
+    tz = ZoneInfo("Europe/Paris")
+    now = datetime.now(tz)
+
+    # Prochaine occurrence du 23 septembre à 22:00 (année courante, sinon année suivante)
+    target = datetime(year=now.year, month=9, day=23, hour=22, minute=0, second=0, tzinfo=tz)
+    if target <= now:
+        target = target.replace(year=now.year + 1)
+
+    countdown = _format_countdown(target - now)
+    caption = (
+        f"🎉 Soirée PACIF 🎉\n"
+        f"{countdown}\n"
+        f"(échéance : {target.strftime('%A %d %B %Y à %Hh').capitalize()})"
+    )
+
+    # Envoi d'une image aléatoire du dossier media/pacif en légende
+    img_dir = MEDIA_DIR / "pacif" / "pacif1.png"
+    if img_dir.exists():
+        with img_dir.open("rb") as f:
+            await update.message.reply_photo(photo=f, caption=caption)
+            
+            return
+
+    # Fallback s'il n'y a pas d'image
+    await update.message.reply_text("⚠️ Aucune image trouvée dans 'media/pacif'.\n" + caption)
+
+
+
+
+
+
+
+# ------------------------------- APP ---------------------------------
 def build_app() -> Application:
     app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler('start', start))
-    app.add_handler(CommandHandler('liens', liens))
-    app.add_handler(CommandHandler('dj', dj))
-    app.add_handler(CommandHandler('rire', rire))
-    app.add_handler(CommandHandler('chant', chant))
-    app.add_handler(CommandHandler('fb', fb))
-    app.add_handler(CommandHandler('president', president))
-    app.add_handler(CommandHandler('prochainpres', nextPres))
-    app.add_handler(CommandHandler('capartencouilles', nimp))
-    app.add_handler(CommandHandler('canard', canard))
-    app.add_handler(CommandHandler('meow', meow))
-    app.add_handler(CommandHandler('snuss', snuss))
-    app.add_handler(CommandHandler('cacahuetes', cacahuetes))
-    app.add_handler(CommandHandler('sagmmescouilles', sagmmescouilles))
-    app.add_handler(CommandHandler('dance', dance))
-    app.add_handler(CommandHandler('pearl', pearl))
+    # On wrappe TOUS les handlers avec once_per_message
+    app.add_handler(CommandHandler('start', once_per_message(start)))
+    app.add_handler(CommandHandler('liens', once_per_message(liens)))
+    app.add_handler(CommandHandler('dj', once_per_message(dj)))
+    app.add_handler(CommandHandler('rire', once_per_message(rire)))
+    app.add_handler(CommandHandler('chant', once_per_message(chant)))
+    app.add_handler(CommandHandler('fb', once_per_message(fb)))
+    app.add_handler(CommandHandler('president', once_per_message(president)))
+    app.add_handler(CommandHandler('prochainpres', once_per_message(nextPres)))
+    app.add_handler(CommandHandler('capartencouilles', once_per_message(nimp)))
+    app.add_handler(CommandHandler('canard', once_per_message(canard)))
+    app.add_handler(CommandHandler('meow', once_per_message(meow)))
+    app.add_handler(CommandHandler('snuss', once_per_message(snuss)))
+    app.add_handler(CommandHandler('cacahuetes', once_per_message(cacahuetes)))
+    app.add_handler(CommandHandler('sagmmescouilles', once_per_message(sagmmescouilles)))
+    app.add_handler(CommandHandler('dance', once_per_message(dance)))
+    app.add_handler(CommandHandler('pearl', once_per_message(pearl)))
     app.add_handler(CommandHandler('otiste', once_per_message(otiste)))
+
     return app
 
 if __name__ == '__main__':
