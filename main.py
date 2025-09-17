@@ -61,6 +61,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "    - /dance\n"
         "    - /pearl\n"
         "    - /otiste\n"
+        "    - /pacif\n"
+        "    - /bdestaffbde\n"
     )
 
 async def liens(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -112,6 +114,9 @@ async def dance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await send_video_path(update, random.choice(videos))
 
+
+async def piscine(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "piscine.mp4")
 
 # --------------------------------- VOIX ---------------------------------
 
@@ -346,6 +351,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('otiste', once_per_message(otiste)))
     app.add_handler(CommandHandler('pacif', once_per_message(pacif)))
     app.add_handler(CommandHandler('bdestaffbde', once_per_message(bdestaffbde)))
+    app.add_handler(CommandHandler('piscine', once_per_message(piscine)))
 
     return app
 
