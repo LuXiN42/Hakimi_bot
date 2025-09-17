@@ -341,6 +341,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('dance', once_per_message(dance)))
     app.add_handler(CommandHandler('pearl', once_per_message(pearl)))
     app.add_handler(CommandHandler('otiste', once_per_message(otiste)))
+    app.add_handler(CommandHandler('pacif', once_per_message(pacif)))
 
     return app
 
