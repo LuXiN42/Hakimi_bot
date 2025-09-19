@@ -92,7 +92,7 @@ async def cacahuetes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
 
 async def chien(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_video_path(update, MEDIA_DIR / "chien.mov")
+    await send_video_path(update, MEDIA_DIR / "chien.MOV")
     
 
 async def daphne(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -162,7 +162,7 @@ async def shoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not video_dir.is_dir():
         await update.message.reply_text("Désolé, le dossier des vidéos n'existe pas.")
         return
-    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".MOV"]
+    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".mov"]
     if not videos:
         await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
         return
