@@ -162,7 +162,7 @@ async def shoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not video_dir.is_dir():
         await update.message.reply_text("Désolé, le dossier des vidéos n'existe pas.")
         return
-    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".mp4"]
+    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".MOV"]
     if not videos:
         await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
         return
