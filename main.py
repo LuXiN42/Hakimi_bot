@@ -63,6 +63,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "    - /otiste\n"
         "    - /pacif\n"
         "    - /bdestaffbde\n"
+        "    - /daphne\n"
+        "    - /poteau\n"
+        "    - /shoot\n"
+        "    - /chien\n"
     )
 
 async def liens(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -77,30 +81,44 @@ async def liens(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Voici nos différents réseaux sociaux :", reply_markup=reply_markup)
 
 # --------------------------------- VIDEOS ---------------------------------
+        
 
-
-async def send_video_path(update: Update, path: Path):
-    if path.exists():
-        with path.open("rb") as f:
-            await update.message.reply_video(video=f)
-    else:
-        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+async def bdestaffbde(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "bdestaffbde.mp4")
 
 
 async def cacahuetes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_video_path(update, MEDIA_DIR / "cacahuètes.mp4")
     
 
-async def bdestaffbde(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_video_path(update, MEDIA_DIR / "bdestaffbde.mp4")
+async def chien(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "chien.mov")
+    
 
+async def daphne(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Envoie aléatoirement une image OU une vidéo depuis media/daphne/
+    """
+    daphne_dir = MEDIA_DIR / "daphne"
+    if not daphne_dir.is_dir():
+        await update.message.reply_text("Désolé, le dossier 'daphne' n'existe pas.")
+        return
 
-async def dj(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_video_path(update, MEDIA_DIR / "dj.MOV")
+    image_exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+    video_exts = {".mp4", ".mov", ".m4v", ".webm"}
 
+    files = [p for p in daphne_dir.iterdir() if p.is_file() and p.suffix.lower() in (image_exts | video_exts)]
+    if not files:
+        await update.message.reply_text("Désolé, aucune image/vidéo trouvée dans 'daphne'.")
+        return
 
-async def sagmmescouilles(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_video_path(update, MEDIA_DIR / "sagmmescouilles.MP4")
+    path = random.choice(files)
+    if path.suffix.lower() in image_exts:
+        with path.open("rb") as f:
+            await update.message.reply_photo(photo=f)
+    else:
+        with path.open("rb") as f:
+            await update.message.reply_video(video=f)
 
 
 async def dance(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -113,20 +131,47 @@ async def dance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
         return
     await send_video_path(update, random.choice(videos))
+    
+
+async def dj(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "dj.MOV")
 
 
 async def piscine(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_video_path(update, MEDIA_DIR / "piscine.mp4")
+    
+
+async def poteau(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "poteau.mp4")
+    
+
+async def sagmmescouilles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_video_path(update, MEDIA_DIR / "sagmmescouilles.MP4")
+    
+
+async def send_video_path(update: Update, path: Path):
+    if path.exists():
+        with path.open("rb") as f:
+            await update.message.reply_video(video=f)
+    else:
+        await update.message.reply_text("Désolé, la vidéo n'a pas pu être trouvée.")
+        
+
+async def shoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    video_dir = MEDIA_DIR / "shoot"
+    if not video_dir.is_dir():
+        await update.message.reply_text("Désolé, le dossier des vidéos n'existe pas.")
+        return
+    videos = [p for p in video_dir.iterdir() if p.suffix.lower() == ".mp4"]
+    if not videos:
+        await update.message.reply_text("Désolé, il n'y a pas de vidéos disponibles.")
+        return
+    await send_video_path(update, random.choice(videos))
 
 # --------------------------------- VOIX ---------------------------------
 
 
-async def send_voice_path(update: Update, path: Path):
-    if path.exists():
-        with path.open("rb") as f:
-            await update.message.reply_voice(voice=f)
-    else:
-        await update.message.reply_text("Désolé, le fichier vocal est introuvable.")
+
 
 
 async def canard(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -175,6 +220,14 @@ async def rire(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Désolé, il n'y a pas de fichiers vocaux disponibles.")
         return
     await send_voice_path(update, random.choice(vocaux))
+    
+
+async def send_voice_path(update: Update, path: Path):
+    if path.exists():
+        with path.open("rb") as f:
+            await update.message.reply_voice(voice=f)
+    else:
+        await update.message.reply_text("Désolé, le fichier vocal est introuvable.")
     
 
 # ------------------------------- IMAGES ---------------------------------
@@ -352,6 +405,10 @@ def build_app() -> Application:
     app.add_handler(CommandHandler('pacif', once_per_message(pacif)))
     app.add_handler(CommandHandler('bdestaffbde', once_per_message(bdestaffbde)))
     app.add_handler(CommandHandler('piscine', once_per_message(piscine)))
+    app.add_handler(CommandHandler('daphne', once_per_message(daphne)))
+    app.add_handler(CommandHandler('shoot', once_per_message(shoot)))
+    app.add_handler(CommandHandler('poteau', once_per_message(poteau)))
+    app.add_handler(CommandHandler('chien', once_per_message(chien)))
 
     return app
 
